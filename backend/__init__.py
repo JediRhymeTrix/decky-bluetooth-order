@@ -1,0 +1,1 @@
+"""Read-only Bluetooth observation and local ordering preferences."""

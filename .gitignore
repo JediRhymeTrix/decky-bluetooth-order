@@ -1,0 +1,13 @@
+node_modules/
+dist/
+out/
+py_modules/*
+!py_modules/dbus_next/
+!py_modules/stdlib_xml/
+.venv/
+__pycache__/
+*.pyc
+*.log
+.env
+diagnostics*.json
+diagnostics/

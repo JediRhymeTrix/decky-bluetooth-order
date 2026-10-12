@@ -1,0 +1,10 @@
+{
+  "name": "Bluetooth Order",
+  "author": "JediRhymeTrix",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["bluetooth", "utility"],
+    "description": "Choose recent connections or alphabetical ordering for Steam's native Bluetooth device lists in Quick Access and Settings."
+  }
+}
