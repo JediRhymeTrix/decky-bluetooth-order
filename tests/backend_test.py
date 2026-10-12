@@ -172,10 +172,28 @@ class StateTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_continuous_changes_have_maximum_debounce_delay(self):
         self.state.debounce, self.state.max_delay = 0.03, 0.04
-        for index in range(12):
-            self.state.set_settings({"mode": "az" if index % 2 else "za"})
-            await asyncio.sleep(0.005)
-        self.assertGreater(self.state.saved_generation, 0)
+        async def produce():
+            index = 0
+            while True:
+                self.state.set_settings({"mode": "az" if index % 2 else "za"})
+                index += 1
+                await asyncio.sleep(0.005)
+        async def inline_write(write, *args):
+            return write(*args)
+        self.state.write = Mock()
+        # Check starvation while updates continue, not a hosted runner's disk latency.
+        with patch("backend.state.asyncio.to_thread", new=AsyncMock(side_effect=inline_write)):
+            producer = asyncio.create_task(produce())
+            try:
+                await eventually(lambda: self.state.saved_generation > 0)
+                self.assertFalse(producer.done())
+                self.state.write.assert_called()
+            finally:
+                producer.cancel()
+                try:
+                    await producer
+                except asyncio.CancelledError:
+                    pass
 
     async def test_emit_error_and_slow_emit_coalesce_without_event_tasks(self):
         self.emit.side_effect = RuntimeError(ADDRESS)
