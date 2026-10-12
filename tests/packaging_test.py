@@ -403,7 +403,7 @@ class ReleaseMetadataTests(unittest.TestCase):
         self.assertTrue(all(isinstance(tag, str) and tag for tag in manifest["publish"]["tags"]))
         self.assertEqual(package["name"], "decky-bluetooth-order")
         self.assertEqual(package["type"], "module")
-        self.assertEqual(package["version"], "0.1.0")
+        self.assertTrue(packaging.SEMVER.fullmatch(package["version"]))
         self.assertEqual(package["author"], "JediRhymeTrix")
         expected_docs = {"README.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md",
                          "documentation/automation.md", "documentation/distribution.md", "documentation/testing.md"}
@@ -411,7 +411,7 @@ class ReleaseMetadataTests(unittest.TestCase):
         for name in expected_docs:
             self.assertTrue((SCRIPTS.parent / name).read_text().strip(), name)
         notes = release_metadata.changelog_notes((SCRIPTS.parent / "CHANGELOG.md").read_text(), package["version"])
-        self.assertTrue(notes.startswith("## [0.1.0] - 2026-10-11\n"))
+        self.assertTrue(notes.startswith(f"## [{package['version']}] - "))
 
     def test_checked_wheel_rejects_unverified_data(self):
         with self.assertRaisesRegex(packaging.PackageError, "SHA256"):
