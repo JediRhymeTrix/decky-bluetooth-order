@@ -583,6 +583,20 @@ class ObserverTests(unittest.IsolatedAsyncioTestCase):
             await eventually(lambda: self.state.observer_status == "unavailable")
             self.assertTrue(self.observer.task.done())
 
+    async def test_stop_during_connect_does_not_subscribe_or_backoff(self):
+        class StoppingBus(FakeBus):
+            async def connect(bus):
+                self.observer.stopping = True
+                return bus
+        bus = StoppingBus()
+        self.observer = Observer(self.state, self.logger, bus_factory=lambda: bus)
+        with patch("backend.observer.asyncio.sleep", new=AsyncMock()) as backoff:
+            await self.observer._run()
+        self.assertEqual(bus.calls, [])
+        self.assertEqual(bus.handlers, [])
+        self.assertTrue(bus.disconnected)
+        backoff.assert_not_awaited()
+
     async def test_bounded_failed_reconnect_redacted_errors(self):
         bus = FakeBus()
         bus.method_error = "GetManagedObjects"

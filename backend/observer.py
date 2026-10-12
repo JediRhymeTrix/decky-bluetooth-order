@@ -106,6 +106,9 @@ class Observer:
                     self.owner, self.paths = "", {}
                     self.bus = factory()
                     await asyncio.wait_for(self.bus.connect(), self.call_timeout)
+                    # Python 3.11 wait_for can consume cancellation as connect completes.
+                    if self.stopping:
+                        return
                     self.bus.add_message_handler(self._message)
                     self.disconnect_task = asyncio.create_task(self._watch_disconnect(self.bus))
                     for rule in RULES:
@@ -128,6 +131,8 @@ class Observer:
                     self.logger.warning("Bluetooth Order observer temporarily unavailable")
                 finally:
                     await self._release_bus()
+                if self.stopping:
+                    return
                 if failures >= len(self.retry_delays):
                     self.state.status("unavailable", clear=True)
                     return

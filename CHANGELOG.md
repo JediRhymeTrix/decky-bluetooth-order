@@ -24,6 +24,8 @@ Initial public release of **Bluetooth Order**.
 - Stale panels disable their controls and explain how to reopen after updating.
 - Bounded backend waits, render-loop regressions, isolated QAM session tracking,
   and a hash-checked XML fallback for Decky's frozen Python runtime.
+- Immediate observer shutdown skips subscription/retry work when cancellation
+  races a completed connection on Python 3.11.
 - Complete ESM release ZIP, pinned dependencies, checksums, and CI/release checks.
 
 ### Verification and known limits

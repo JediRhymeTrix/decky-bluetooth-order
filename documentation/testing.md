@@ -12,8 +12,8 @@
 - `scripts/native_recon.mjs` performs bounded cached reads only and confirmed the known native entry signatures and key. No plugin install or service restart is part of recon.
 
 Local verification after release hardening: 59 frontend/native-render tests,
-40 backend tests, 41 packaging/release-metadata tests, and 11 offline release-shell
-tests passed (151 total), plus type checking, Rollup build, hash-verified vendoring,
+41 backend tests, 41 packaging/release-metadata tests, and 11 offline release-shell
+tests passed (152 total), plus type checking, Rollup build, hash-verified vendoring,
 complete-input checks and release ZIP verification. The rebuilt ZIP includes the
 late-alternate cleanup, XML compatibility fixes, and release documentation; all
 45 archive entries are allowlisted. Its SHA256 was verified. Before release
@@ -28,6 +28,14 @@ available in the repository's Actions tab. Local checks alone do not establish
 hardware certification or a completed hosted workflow.
 
 ## Read-only pre-install observations
+
+Hosted Python 3.11 exposed an immediate-shutdown cancellation race absent from
+the local Python 3.14 run: `wait_for` can consume cancellation when bus connection
+has already completed, and the observer then entered its retry delay despite
+stopping. Reproduced with isolated Python 3.11.17. The observer now checks stopping
+before subscriptions and before retry delay. A deterministic regression failed
+before the fix on both Python versions; the existing immediate-close deadline
+remains unchanged. No live Bluetooth calls or installed plugin files were touched.
 
 Before the first installation, Decky v3.2.10 was running and Bluetooth Order was not installed. A bounded cached
 read found the QAM browser memo mounted with a writable, matching renderer and
